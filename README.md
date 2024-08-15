@@ -1,17 +1,3 @@
-# QR Code Generator
-
-This is a simple QR code generator that uses HTML, CSS, and JavaScript. The QR code is generated directly in the browser and can be downloaded as a PNG file.
-
-## Instructions
-
-1. Save the following code into a file named `index.html`.
-2. Open the file in a web browser.
-3. Enter a website link in the input field.
-4. Click "Generate QR Code."
-5. The QR code will be generated and displayed below the form.
-6. A "Download QR Code" link will appear, allowing you to download the generated QR code as a PNG file.
-
-## HTML, CSS, and JavaScript Code
 
 ```html
 <!DOCTYPE html>
