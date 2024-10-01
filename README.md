@@ -55,6 +55,16 @@
     #qrcode {
       margin-top: 20px;
     }
+
+    .color-preview {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      margin-left: 10px;
+      vertical-align: middle;
+      border: 1px solid #000;
+    }
   </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -87,8 +97,10 @@
 
       <!-- Restaurant Name Font Settings -->
       <div>
-        <label for="restaurantFontColor">Restaurant Name Font Color:</label>
-        <input type="color" id="restaurantFontColor" required>
+        <label for="restaurantFontColor">Restaurant Name Font Color:
+          <input type="color" id="restaurantFontColor" required onchange="updateColorPreview('restaurantFontColor', 'restaurantFontColorPreview')">
+          <span class="color-preview" id="restaurantFontColorPreview"></span>
+        </label>
       </div>
       <div>
         <label for="restaurantFontSize">Restaurant Name Font Size (px):</label>
@@ -98,12 +110,16 @@
       <!-- First Page Background and Font Settings -->
       <h3>First Page Settings</h3>
       <div>
-        <label for="firstPageBackgroundColor">First Page Background Color:</label>
-        <input type="color" id="firstPageBackgroundColor" required>
+        <label for="firstPageBackgroundColor">First Page Background Color:
+          <input type="color" id="firstPageBackgroundColor" required onchange="updateColorPreview('firstPageBackgroundColor', 'firstPageBackgroundPreview')">
+          <span class="color-preview" id="firstPageBackgroundPreview"></span>
+        </label>
       </div>
       <div>
-        <label for="firstPageFontColor">First Page Font Color:</label>
-        <input type="color" id="firstPageFontColor" required>
+        <label for="firstPageFontColor">First Page Font Color:
+          <input type="color" id="firstPageFontColor" required onchange="updateColorPreview('firstPageFontColor', 'firstPageFontColorPreview')">
+          <span class="color-preview" id="firstPageFontColorPreview"></span>
+        </label>
       </div>
       <div>
         <label for="firstPageFontSize">First Page Font Size (px):</label>
@@ -113,12 +129,16 @@
       <!-- Second Page Background and Font Settings -->
       <h3>Second Page Settings</h3>
       <div>
-        <label for="secondPageBackgroundColor">Second Page Background Color:</label>
-        <input type="color" id="secondPageBackgroundColor" required>
+        <label for="secondPageBackgroundColor">Second Page Background Color:
+          <input type="color" id="secondPageBackgroundColor" required onchange="updateColorPreview('secondPageBackgroundColor', 'secondPageBackgroundPreview')">
+          <span class="color-preview" id="secondPageBackgroundPreview"></span>
+        </label>
       </div>
       <div>
-        <label for="secondPageFontColor">Second Page Font Color:</label>
-        <input type="color" id="secondPageFontColor" required>
+        <label for="secondPageFontColor">Second Page Font Color:
+          <input type="color" id="secondPageFontColor" required onchange="updateColorPreview('secondPageFontColor', 'secondPageFontColorPreview')">
+          <span class="color-preview" id="secondPageFontColorPreview"></span>
+        </label>
       </div>
       <div>
         <label for="secondPageFontSize">Second Page Font Size (px):</label>
@@ -127,8 +147,10 @@
 
       <!-- Font Color and Size for Menu Items -->
       <div>
-        <label for="fontColor">Menu Font Color:</label>
-        <input type="color" id="fontColor" required>
+        <label for="fontColor">Menu Font Color:
+          <input type="color" id="fontColor" required onchange="updateColorPreview('fontColor', 'menuFontColorPreview')">
+          <span class="color-preview" id="menuFontColorPreview"></span>
+        </label>
       </div>
       <div>
         <label for="fontSize">Menu Font Size (px):</label>
@@ -374,6 +396,11 @@
         reader.onerror = reject;
         reader.readAsDataURL(file);
       });
+    }
+
+    function updateColorPreview(colorInputId, previewId) {
+      const color = document.getElementById(colorInputId).value;
+      document.getElementById(previewId).style.backgroundColor = color;
     }
   </script>
 </body>
