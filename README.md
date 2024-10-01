@@ -49,6 +49,16 @@
         #first-page-preview, #second-page-preview {
             margin-bottom: 20px;
         }
+
+        .color-preview {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            margin-left: 10px;
+            vertical-align: middle;
+            border: 1px solid #000;
+        }
     </style>
 </head>
 <body>
@@ -95,6 +105,30 @@
             <div id="second-page-preview"></div>
         </div>
 
+        <h3>First Page Settings</h3>
+        <label for="firstPageBackgroundColor">Background Color:</label>
+        <input type="color" id="firstPageBackgroundColor" onchange="updateColorPreview('firstPageBackgroundColor', 'firstPageBackgroundPreview')">
+        <span class="color-preview" id="firstPageBackgroundPreview"></span>
+        
+        <label for="firstPageFontColor">Font Color:</label>
+        <input type="color" id="firstPageFontColor" onchange="updateColorPreview('firstPageFontColor', 'firstPageFontColorPreview')">
+        <span class="color-preview" id="firstPageFontColorPreview"></span>
+        
+        <label for="firstPageFontSize">Font Size (px):</label>
+        <input type="number" id="firstPageFontSize" placeholder="Enter font size" required>
+
+        <h3>Second Page Settings</h3>
+        <label for="secondPageBackgroundColor">Background Color:</label>
+        <input type="color" id="secondPageBackgroundColor" onchange="updateColorPreview('secondPageBackgroundColor', 'secondPageBackgroundPreview')">
+        <span class="color-preview" id="secondPageBackgroundPreview"></span>
+
+        <label for="secondPageFontColor">Font Color:</label>
+        <input type="color" id="secondPageFontColor" onchange="updateColorPreview('secondPageFontColor', 'secondPageFontColorPreview')">
+        <span class="color-preview" id="secondPageFontColorPreview"></span>
+
+        <label for="secondPageFontSize">Font Size (px):</label>
+        <input type="number" id="secondPageFontSize" placeholder="Enter font size" required>
+
         <button onclick="saveMenu()">Save Menu</button>
     </div>
 
@@ -138,16 +172,40 @@
         function saveMenu() {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
-            doc.text(document.getElementById('restaurant-name').value, 10, 10);
-            doc.text(document.getElementById('restaurant-address').value, 10, 20);
-            doc.text(document.getElementById('proprietor-name').value, 10, 30);
-            doc.text(document.getElementById('phone-number').value, 10, 40);
+
+            // First Page Information
+            doc.setFillColor(document.getElementById('firstPageBackgroundColor').value);
+            doc.rect(0, 0, doc.internal.pageSize.getWidth(), doc.internal.pageSize.getHeight(), 'F');
+            doc.setTextColor(document.getElementById('firstPageFontColor').value);
+            doc.setFontSize(document.getElementById('firstPageFontSize').value);
+            doc.text(`Welcome to ${document.getElementById('restaurant-name').value}`, 10, 20);
+            doc.text(`Address: ${document.getElementById('restaurant-address').value}`, 10, 30);
+            doc.text(`Proprietor: ${document.getElementById('proprietor-name').value}`, 10, 40);
+            doc.text(`Phone: ${document.getElementById('phone-number').value}`, 10, 50);
+
+            // Add QR Code
+            // Note: QR code functionality not implemented here; placeholder can be added if needed.
+
+            // Add a page break
+            doc.addPage();
+
+            // Second Page Settings
+            doc.setFillColor(document.getElementById('secondPageBackgroundColor').value);
+            doc.rect(0, 0, doc.internal.pageSize.getWidth(), doc.internal.pageSize.getHeight(), 'F');
+            doc.setTextColor(document.getElementById('secondPageFontColor').value);
+            doc.setFontSize(document.getElementById('secondPageFontSize').value);
 
             menuItems.forEach((item, index) => {
-                doc.text(`${item.name} - ${item.price} (${item.category}, ${item.type})`, 10, 50 + (index * 10));
+                doc.text(`${item.name} - ${item.price} (${item.category}, ${item.type})`, 10, 20 + (index * 10));
             });
 
+            // Save the PDF with the name of the restaurant
             doc.save(`${document.getElementById('restaurant-name').value}_menu.pdf`);
+        }
+
+        function updateColorPreview(colorInputId, previewId) {
+            const color = document.getElementById(colorInputId).value;
+            document.getElementById(previewId).style.backgroundColor = color;
         }
     </script>
 </body>
