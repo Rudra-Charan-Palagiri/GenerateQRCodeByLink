@@ -251,11 +251,10 @@
         <h4>Phone: ${restaurantPhone}</h4>
         <h4>Scan This QR For Online Menu Card</h4>
       `;
-      generateQRCode();
+      generateQRCode(`${restaurantName}_Menu.pdf`); // Generate QR code with the PDF file name
     }
 
-    function generateQRCode() {
-      const pdfFileName = `${document.getElementById('restaurantName').value}_Menu.pdf`;
+    function generateQRCode(pdfFileName) {
       const qrcode = new QRCode(document.getElementById("qrcode"), {
         text: pdfFileName,  // QR code contains the file name of the PDF
         width: 128,
