@@ -185,8 +185,9 @@
 
             firstPagePreview.innerHTML = `
                 <div class="center-text">
-                    <h3>${document.getElementById('restaurant-name').value}</h3>
+                    <h3>Welcome</h3>
                     <img src="${document.getElementById('logo-upload').files[0] ? URL.createObjectURL(document.getElementById('logo-upload').files[0]) : ''}" alt="Restaurant Logo" style="max-width:100px;">
+                    <h3>${document.getElementById('restaurant-name').value}</h3>
                     <p>${document.getElementById('restaurant-address').value}</p>
                     <p>${document.getElementById('proprietor-name').value}</p>
                     <p>${document.getElementById('phone-number').value}</p>
@@ -226,10 +227,11 @@
             doc.rect(0, 0, doc.internal.pageSize.getWidth(), doc.internal.pageSize.getHeight(), 'F');
             doc.setTextColor(document.getElementById('firstPageFontColor').value);
             doc.setFontSize(document.getElementById('firstPageFontSize').value);
-            doc.text(`Welcome to ${document.getElementById('restaurant-name').value}`, 105, 20, { align: 'center' });
-            doc.text(`Address: ${document.getElementById('restaurant-address').value}`, 105, 30, { align: 'center' });
-            doc.text(`Proprietor: ${document.getElementById('proprietor-name').value}`, 105, 40, { align: 'center' });
-            doc.text(`Phone: ${document.getElementById('phone-number').value}`, 105, 50, { align: 'center' });
+            doc.text('Welcome', 105, 20, { align: 'center' });
+            doc.text(`${document.getElementById('restaurant-name').value}`, 105, 40, { align: 'center' });
+            doc.text(`Address: ${document.getElementById('restaurant-address').value}`, 105, 50, { align: 'center' });
+            doc.text(`Proprietor: ${document.getElementById('proprietor-name').value}`, 105, 60, { align: 'center' });
+            doc.text(`Phone: ${document.getElementById('phone-number').value}`, 105, 70, { align: 'center' });
 
             // Add Logo
             if (document.getElementById('logo-upload').files[0]) {
