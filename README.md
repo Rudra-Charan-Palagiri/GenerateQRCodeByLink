@@ -97,21 +97,21 @@
 
       <!-- Background and Border Color -->
       <div>
-        <label for="backgroundColor">Menu Background Color:</label>
+        <label for="backgroundColor">First Page Background Color:</label>
         <input type="color" id="backgroundColor" required>
       </div>
       <div>
-        <label for="borderColor">Menu Border Color:</label>
+        <label for="borderColor">First Page Border Color:</label>
         <input type="color" id="borderColor" required>
       </div>
 
       <!-- Font Color and Size for Items -->
       <div>
-        <label for="fontColor">Font Color:</label>
+        <label for="fontColor">Menu Font Color:</label>
         <input type="color" id="fontColor" required>
       </div>
       <div>
-        <label for="fontSize">Font Size (px):</label>
+        <label for="fontSize">Menu Font Size (px):</label>
         <input type="number" id="fontSize" placeholder="Enter font size" required>
       </div>
 
@@ -145,7 +145,7 @@
 
       <!-- Submit -->
       <button type="button" onclick="addItem()">Add to Menu</button>
-      <button type="button" onclick="generateMenu()">Generate Menu</button>
+      <button type="button" onclick="saveMenu()">Save Menu</button>
     </form>
 
     <!-- First Page Preview -->
@@ -182,14 +182,10 @@
       const menuPreview = document.getElementById('menuPreview');
       menuPreview.innerHTML = '';
 
-      const backgroundColor = document.getElementById('backgroundColor').value;
-      const borderColor = document.getElementById('borderColor').value;
       const fontColor = document.getElementById('fontColor').value;
       const fontSize = document.getElementById('fontSize').value + 'px';
 
       // Apply styles
-      menuPreview.style.backgroundColor = backgroundColor;
-      menuPreview.style.borderColor = borderColor;
       menuPreview.style.color = fontColor;
       menuPreview.style.fontSize = fontSize;
 
@@ -239,6 +235,12 @@
       const restaurantPhone = document.getElementById('restaurantPhone').value;
       const restaurantLogo = document.getElementById('restaurantLogo').files[0];
 
+      const backgroundColor = document.getElementById('backgroundColor').value;
+      const borderColor = document.getElementById('borderColor').value;
+
+      firstPagePreview.style.backgroundColor = backgroundColor;
+      firstPagePreview.style.borderColor = borderColor;
+
       firstPagePreview.innerHTML = `
         <h2>Welcome to ${restaurantName}</h2>
         <div>
@@ -253,27 +255,29 @@
     }
 
     function generateQRCode() {
+      const pdfFileName = `${document.getElementById('restaurantName').value}_Menu.pdf`;
       const qrcode = new QRCode(document.getElementById("qrcode"), {
-        text: "Your menu will be available online!",
+        text: pdfFileName,  // QR code contains the file name of the PDF
         width: 128,
         height: 128,
       });
     }
 
-    async function generateMenu() {
+    async function saveMenu() {
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF();
 
-      // Add logo, address, proprietor info, and QR code on the first page
+      // First Page Information
       const restaurantName = document.getElementById('restaurantName').value;
       const restaurantAddress = document.getElementById('restaurantAddress').value;
       const restaurantProp = document.getElementById('restaurantProp').value;
       const restaurantPhone = document.getElementById('restaurantPhone').value;
       const restaurantLogo = document.getElementById('restaurantLogo').files[0];
 
+      // Add Logo
       if (restaurantLogo) {
         const logoImage = await loadImage(restaurantLogo);
-        doc.addImage(logoImage, 'PNG', 10, 10, 50, 50); // logo dimensions (adjust as needed)
+        doc.addImage(logoImage, 'PNG', 10, 10, 50, 50); // logo dimensions
       }
 
       doc.setFontSize(20);
@@ -286,13 +290,12 @@
       // Add QR Code
       const qrCodeCanvas = document.getElementById('qrcode').children[0];
       const qrCodeImage = await loadImage(qrCodeCanvas.toDataURL());
-      doc.addImage(qrCodeImage, 'PNG', 10, 110, 50, 50); // QR code dimensions (adjust as needed)
+      doc.addImage(qrCodeImage, 'PNG', 10, 110, 50, 50); // QR code dimensions
 
       // Add a page break
       doc.addPage();
 
       // Menu Items
-      const backgroundColor = document.getElementById('backgroundColor').value;
       const fontColor = document.getElementById('fontColor').value;
       const fontSize = document.getElementById('fontSize').value;
 
@@ -326,9 +329,8 @@
         }
       });
 
-      // Save the PDF
-      const pdfFileName = `${restaurantName}_Menu.pdf`;
-      doc.save(pdfFileName);
+      // Save the PDF with the name of the restaurant
+      doc.save(`${restaurantName}_Menu.pdf`);
     }
 
     function loadImage(file) {
