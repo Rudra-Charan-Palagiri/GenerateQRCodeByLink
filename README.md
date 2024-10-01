@@ -40,14 +40,20 @@
       border: 5px solid #ddd;
     }
 
-    #qrcode {
+    #firstPagePreview {
       margin-top: 20px;
+      border: 5px solid #ddd;
+      padding: 20px;
+      text-align: center;
     }
 
-    .menu {
-      padding: 20px;
-      background-size: cover;
-      background-position: center;
+    img {
+      max-width: 100px;
+      margin-bottom: 10px;
+    }
+
+    #qrcode {
+      margin-top: 20px;
     }
   </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -65,6 +71,14 @@
       <div>
         <label for="restaurantAddress">Address:</label>
         <input type="text" id="restaurantAddress" placeholder="Enter restaurant address" required>
+      </div>
+      <div>
+        <label for="restaurantProp">Proprietor Name:</label>
+        <input type="text" id="restaurantProp" placeholder="Enter proprietor name" required>
+      </div>
+      <div>
+        <label for="restaurantPhone">Phone Number:</label>
+        <input type="tel" id="restaurantPhone" placeholder="Enter phone number" required>
       </div>
       <div>
         <label for="restaurantLogo">Logo:</label>
@@ -89,12 +103,6 @@
       <div>
         <label for="borderColor">Menu Border Color:</label>
         <input type="color" id="borderColor" required>
-      </div>
-
-      <!-- Online Image -->
-      <div>
-        <label for="menuImage">Background Image URL:</label>
-        <input type="url" id="menuImage" placeholder="Optional: Paste image URL">
       </div>
 
       <!-- Font Color and Size for Items -->
@@ -140,11 +148,13 @@
       <button type="button" onclick="generateMenu()">Generate Menu</button>
     </form>
 
-    <!-- Menu Display -->
+    <!-- First Page Preview -->
+    <h2>First Page Preview</h2>
+    <div id="firstPagePreview"></div>
     <h2>Menu Preview</h2>
     <div id="menuPreview" class="menu"></div>
 
-    <!-- Generate PDF and QR Code -->
+    <!-- QR Code -->
     <div id="qrcode"></div>
   </div>
 
@@ -174,7 +184,6 @@
 
       const backgroundColor = document.getElementById('backgroundColor').value;
       const borderColor = document.getElementById('borderColor').value;
-      const backgroundImage = document.getElementById('menuImage').value;
       const fontColor = document.getElementById('fontColor').value;
       const fontSize = document.getElementById('fontSize').value + 'px';
 
@@ -183,9 +192,6 @@
       menuPreview.style.borderColor = borderColor;
       menuPreview.style.color = fontColor;
       menuPreview.style.fontSize = fontSize;
-      if (backgroundImage) {
-        menuPreview.style.backgroundImage = `url(${backgroundImage})`;
-      }
 
       const categories = ['starters', 'main-course', 'rice-items', 'drinks'];
       categories.forEach(cat => {
@@ -221,65 +227,121 @@
           }
         }
       });
+
+      displayFirstPage();
     }
 
-    function generateMenu() {
+    function displayFirstPage() {
+      const firstPagePreview = document.getElementById('firstPagePreview');
       const restaurantName = document.getElementById('restaurantName').value;
       const restaurantAddress = document.getElementById('restaurantAddress').value;
-      const restaurantFontColor = document.getElementById('restaurantFontColor').value;
-      const restaurantFontSize = document.getElementById('restaurantFontSize').value + 'px';
+      const restaurantProp = document.getElementById('restaurantProp').value;
+      const restaurantPhone = document.getElementById('restaurantPhone').value;
+      const restaurantLogo = document.getElementById('restaurantLogo').files[0];
 
+      firstPagePreview.innerHTML = `
+        <h2>Welcome to ${restaurantName}</h2>
+        <div>
+          <img src="${restaurantLogo ? URL.createObjectURL(restaurantLogo) : ''}" alt="Restaurant Logo">
+        </div>
+        <h3>${restaurantAddress}</h3>
+        <h4>Proprietor: ${restaurantProp}</h4>
+        <h4>Phone: ${restaurantPhone}</h4>
+        <h4>Scan This QR For Online Menu Card</h4>
+      `;
+      generateQRCode();
+    }
+
+    function generateQRCode() {
+      const qrcode = new QRCode(document.getElementById("qrcode"), {
+        text: "Your menu will be available online!",
+        width: 128,
+        height: 128,
+      });
+    }
+
+    async function generateMenu() {
+      const { jsPDF } = window.jspdf;
       const doc = new jsPDF();
-      
-      // Restaurant Name
-      doc.setFontSize(parseInt(restaurantFontSize));
-      doc.setTextColor(restaurantFontColor);
-      doc.text(restaurantName, 20, 20);
-      
-      // Restaurant Address
-      doc.setFontSize(12);
-      doc.setTextColor('#000000');
-      doc.text(restaurantAddress, 20, 30);
 
-      let y = 40;
+      // Add logo, address, proprietor info, and QR code on the first page
+      const restaurantName = document.getElementById('restaurantName').value;
+      const restaurantAddress = document.getElementById('restaurantAddress').value;
+      const restaurantProp = document.getElementById('restaurantProp').value;
+      const restaurantPhone = document.getElementById('restaurantPhone').value;
+      const restaurantLogo = document.getElementById('restaurantLogo').files[0];
+
+      if (restaurantLogo) {
+        const logoImage = await loadImage(restaurantLogo);
+        doc.addImage(logoImage, 'PNG', 10, 10, 50, 50); // logo dimensions (adjust as needed)
+      }
+
+      doc.setFontSize(20);
+      doc.text(`Welcome to ${restaurantName}`, 10, 70);
+      doc.setFontSize(14);
+      doc.text(`Address: ${restaurantAddress}`, 10, 80);
+      doc.text(`Proprietor: ${restaurantProp}`, 10, 90);
+      doc.text(`Phone: ${restaurantPhone}`, 10, 100);
+
+      // Add QR Code
+      const qrCodeCanvas = document.getElementById('qrcode').children[0];
+      const qrCodeImage = await loadImage(qrCodeCanvas.toDataURL());
+      doc.addImage(qrCodeImage, 'PNG', 10, 110, 50, 50); // QR code dimensions (adjust as needed)
+
+      // Add a page break
+      doc.addPage();
+
+      // Menu Items
+      const backgroundColor = document.getElementById('backgroundColor').value;
+      const fontColor = document.getElementById('fontColor').value;
+      const fontSize = document.getElementById('fontSize').value;
+
+      doc.setTextColor(fontColor);
+      doc.setFontSize(fontSize);
 
       const categories = ['starters', 'main-course', 'rice-items', 'drinks'];
       categories.forEach(cat => {
         const items = menuItems.filter(item => item.category === cat);
         if (items.length > 0) {
           doc.setFontSize(16);
-          doc.setTextColor('#000000');
-          doc.text(cat.replace('-', ' ').toUpperCase(), 20, y);
-          y += 10;
+          doc.text(cat.replace('-', ' ').toUpperCase(), 10, doc.autoTable.previous.finalY + 10);
+          doc.setFontSize(14);
 
           const vegItems = items.filter(item => item.itemType === 'Veg');
           const nonVegItems = items.filter(item => item.itemType === 'Non-Veg');
 
           if (vegItems.length > 0) {
-            doc.setFontSize(14);
-            doc.text('Veg', 20, y);
-            y += 10;
+            doc.text('Veg', 10, doc.autoTable.previous.finalY + 10);
             vegItems.forEach(item => {
-              doc.setFontSize(12);
-              doc.text(`${item.itemName} - ₹${item.itemPrice}`, 30, y);
-              y += 10;
+              doc.text(`${item.itemName} - ₹${item.itemPrice}`, 20, doc.autoTable.previous.finalY + 10);
             });
           }
 
           if (nonVegItems.length > 0) {
-            doc.setFontSize(14);
-            doc.text('Non-Veg', 20, y);
-            y += 10;
+            doc.text('Non-Veg', 10, doc.autoTable.previous.finalY + 10);
             nonVegItems.forEach(item => {
-              doc.setFontSize(12);
-              doc.text(`${item.itemName} - ₹${item.itemPrice}`, 30, y);
-              y += 10;
+              doc.text(`${item.itemName} - ₹${item.itemPrice}`, 20, doc.autoTable.previous.finalY + 10);
             });
           }
         }
       });
 
-      doc.save(`${restaurantName}_Menu.pdf`);
+      // Save the PDF
+      const pdfFileName = `${restaurantName}_Menu.pdf`;
+      doc.save(pdfFileName);
+    }
+
+    function loadImage(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const img = new Image();
+          img.onload = () => resolve(img);
+          img.src = reader.result;
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
     }
   </script>
 </body>
