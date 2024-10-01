@@ -59,6 +59,24 @@
             vertical-align: middle;
             border: 1px solid #000;
         }
+
+        /* Center text for the menu preview */
+        .center-text {
+            text-align: center;
+        }
+
+        /* Category and Subheading styles */
+        .category-heading {
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+
+        .subheading {
+            font-size: 16px;
+            font-weight: normal;
+            margin-left: 10px;
+        }
     </style>
 </head>
 <body>
@@ -75,7 +93,7 @@
             <label for="phone-number">Phone Number:</label>
             <input type="text" id="phone-number" required>
             <label for="logo-upload">Logo:</label>
-            <input type="file" id="logo-upload" accept="image/*">
+            <input type="file" id="logo-upload" accept="image/*" required>
         </form>
 
         <form id="menu-item-form">
@@ -158,14 +176,20 @@
             const secondPagePreview = document.getElementById('second-page-preview');
 
             firstPagePreview.innerHTML = `
-                <h3>${document.getElementById('restaurant-name').value}</h3>
-                <p>${document.getElementById('restaurant-address').value}</p>
-                <p>${document.getElementById('proprietor-name').value}</p>
-                <p>${document.getElementById('phone-number').value}</p>
+                <div class="center-text">
+                    <h3>${document.getElementById('restaurant-name').value}</h3>
+                    <img src="${document.getElementById('logo-upload').files[0] ? URL.createObjectURL(document.getElementById('logo-upload').files[0]) : ''}" alt="Restaurant Logo" style="max-width:100px;">
+                    <p>${document.getElementById('restaurant-address').value}</p>
+                    <p>${document.getElementById('proprietor-name').value}</p>
+                    <p>${document.getElementById('phone-number').value}</p>
+                </div>
             `;
 
             secondPagePreview.innerHTML = menuItems.map(item => `
-                <p>${item.name} - ${item.price} (${item.category}, ${item.type})</p>
+                <div>
+                    <div class="category-heading">${item.category}</div>
+                    <div class="subheading">${item.type}: ${item.name} - ${item.price}</div>
+                </div>
             `).join('');
         }
 
@@ -178,29 +202,37 @@
             doc.rect(0, 0, doc.internal.pageSize.getWidth(), doc.internal.pageSize.getHeight(), 'F');
             doc.setTextColor(document.getElementById('firstPageFontColor').value);
             doc.setFontSize(document.getElementById('firstPageFontSize').value);
-            doc.text(`Welcome to ${document.getElementById('restaurant-name').value}`, 10, 20);
-            doc.text(`Address: ${document.getElementById('restaurant-address').value}`, 10, 30);
-            doc.text(`Proprietor: ${document.getElementById('proprietor-name').value}`, 10, 40);
-            doc.text(`Phone: ${document.getElementById('phone-number').value}`, 10, 50);
+            doc.text(`Welcome to ${document.getElementById('restaurant-name').value}`, 105, 20, { align: 'center' });
+            doc.text(`Address: ${document.getElementById('restaurant-address').value}`, 105, 30, { align: 'center' });
+            doc.text(`Proprietor: ${document.getElementById('proprietor-name').value}`, 105, 40, { align: 'center' });
+            doc.text(`Phone: ${document.getElementById('phone-number').value}`, 105, 50, { align: 'center' });
 
-            // Add QR Code
-            // Note: QR code functionality not implemented here; placeholder can be added if needed.
+            // Add Logo
+            if (document.getElementById('logo-upload').files[0]) {
+                const logoImage = new Image();
+                logoImage.src = URL.createObjectURL(document.getElementById('logo-upload').files[0]);
+                logoImage.onload = function () {
+                    doc.addImage(logoImage, 'PNG', 10, 10, 50, 50); // Adjust logo position and size
+                    doc.addPage();
+                    addMenuItemsToPDF(doc); // Call the function to add menu items to the PDF after adding the logo
+                    doc.save(`${document.getElementById('restaurant-name').value}_menu.pdf`);
+                };
+            } else {
+                doc.addPage();
+                addMenuItemsToPDF(doc);
+                doc.save(`${document.getElementById('restaurant-name').value}_menu.pdf`);
+            }
+        }
 
-            // Add a page break
-            doc.addPage();
-
-            // Second Page Settings
+        function addMenuItemsToPDF(doc) {
             doc.setFillColor(document.getElementById('secondPageBackgroundColor').value);
             doc.rect(0, 0, doc.internal.pageSize.getWidth(), doc.internal.pageSize.getHeight(), 'F');
             doc.setTextColor(document.getElementById('secondPageFontColor').value);
             doc.setFontSize(document.getElementById('secondPageFontSize').value);
 
-            menuItems.forEach((item, index) => {
-                doc.text(`${item.name} - ${item.price} (${item.category}, ${item.type})`, 10, 20 + (index * 10));
+            menuItems.forEach((item) => {
+                doc.text(`${item.category}: ${item.name} - ${item.price}`, 10, 20 + (menuItems.indexOf(item) * 10));
             });
-
-            // Save the PDF with the name of the restaurant
-            doc.save(`${document.getElementById('restaurant-name').value}_menu.pdf`);
         }
 
         function updateColorPreview(colorInputId, previewId) {
