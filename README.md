@@ -95,17 +95,37 @@
         <input type="number" id="restaurantFontSize" placeholder="Enter font size" required>
       </div>
 
-      <!-- Background and Border Color -->
+      <!-- First Page Background and Font Settings -->
+      <h3>First Page Settings</h3>
       <div>
-        <label for="backgroundColor">First Page Background Color:</label>
-        <input type="color" id="backgroundColor" required>
+        <label for="firstPageBackgroundColor">First Page Background Color:</label>
+        <input type="color" id="firstPageBackgroundColor" required>
       </div>
       <div>
-        <label for="borderColor">First Page Border Color:</label>
-        <input type="color" id="borderColor" required>
+        <label for="firstPageFontColor">First Page Font Color:</label>
+        <input type="color" id="firstPageFontColor" required>
+      </div>
+      <div>
+        <label for="firstPageFontSize">First Page Font Size (px):</label>
+        <input type="number" id="firstPageFontSize" placeholder="Enter font size" required>
       </div>
 
-      <!-- Font Color and Size for Items -->
+      <!-- Second Page Background and Font Settings -->
+      <h3>Second Page Settings</h3>
+      <div>
+        <label for="secondPageBackgroundColor">Second Page Background Color:</label>
+        <input type="color" id="secondPageBackgroundColor" required>
+      </div>
+      <div>
+        <label for="secondPageFontColor">Second Page Font Color:</label>
+        <input type="color" id="secondPageFontColor" required>
+      </div>
+      <div>
+        <label for="secondPageFontSize">Second Page Font Size (px):</label>
+        <input type="number" id="secondPageFontSize" placeholder="Enter font size" required>
+      </div>
+
+      <!-- Font Color and Size for Menu Items -->
       <div>
         <label for="fontColor">Menu Font Color:</label>
         <input type="color" id="fontColor" required>
@@ -235,21 +255,21 @@
       const restaurantPhone = document.getElementById('restaurantPhone').value;
       const restaurantLogo = document.getElementById('restaurantLogo').files[0];
 
-      const backgroundColor = document.getElementById('backgroundColor').value;
+      const backgroundColor = document.getElementById('firstPageBackgroundColor').value;
       const borderColor = document.getElementById('borderColor').value;
 
       firstPagePreview.style.backgroundColor = backgroundColor;
       firstPagePreview.style.borderColor = borderColor;
 
       firstPagePreview.innerHTML = `
-        <h2>Welcome to ${restaurantName}</h2>
+        <h2 style="color: ${document.getElementById('firstPageFontColor').value}; font-size: ${document.getElementById('firstPageFontSize').value}px;">Welcome to ${restaurantName}</h2>
         <div>
           <img src="${restaurantLogo ? URL.createObjectURL(restaurantLogo) : ''}" alt="Restaurant Logo">
         </div>
-        <h3>${restaurantAddress}</h3>
-        <h4>Proprietor: ${restaurantProp}</h4>
-        <h4>Phone: ${restaurantPhone}</h4>
-        <h4>Scan This QR For Online Menu Card</h4>
+        <h3 style="color: ${document.getElementById('firstPageFontColor').value}; font-size: ${document.getElementById('firstPageFontSize').value}px;">${restaurantAddress}</h3>
+        <h4 style="color: ${document.getElementById('firstPageFontColor').value}; font-size: ${document.getElementById('firstPageFontSize').value}px;">Proprietor: ${restaurantProp}</h4>
+        <h4 style="color: ${document.getElementById('firstPageFontColor').value}; font-size: ${document.getElementById('firstPageFontSize').value}px;">Phone: ${restaurantPhone}</h4>
+        <h4 style="color: ${document.getElementById('firstPageFontColor').value}; font-size: ${document.getElementById('firstPageFontSize').value}px;">Scan This QR For Online Menu Card</h4>
       `;
       generateQRCode(`${restaurantName}_Menu.pdf`); // Generate QR code with the PDF file name
     }
@@ -273,6 +293,10 @@
       const restaurantPhone = document.getElementById('restaurantPhone').value;
       const restaurantLogo = document.getElementById('restaurantLogo').files[0];
 
+      // First Page Settings
+      const firstPageFontColor = document.getElementById('firstPageFontColor').value;
+      const firstPageFontSize = document.getElementById('firstPageFontSize').value;
+
       // Add Logo
       if (restaurantLogo) {
         const logoImage = await loadImage(restaurantLogo);
@@ -280,6 +304,7 @@
       }
 
       doc.setFontSize(20);
+      doc.setTextColor(firstPageFontColor);
       doc.text(`Welcome to ${restaurantName}`, 10, 70);
       doc.setFontSize(14);
       doc.text(`Address: ${restaurantAddress}`, 10, 80);
@@ -294,12 +319,18 @@
       // Add a page break
       doc.addPage();
 
-      // Menu Items
-      const fontColor = document.getElementById('fontColor').value;
-      const fontSize = document.getElementById('fontSize').value;
+      // Second Page Settings
+      const secondPageBackgroundColor = document.getElementById('secondPageBackgroundColor').value;
+      const secondPageFontColor = document.getElementById('secondPageFontColor').value;
+      const secondPageFontSize = document.getElementById('secondPageFontSize').value;
 
-      doc.setTextColor(fontColor);
-      doc.setFontSize(fontSize);
+      // Set background for second page
+      doc.setFillColor(secondPageBackgroundColor);
+      doc.rect(0, 0, doc.internal.pageSize.getWidth(), doc.internal.pageSize.getHeight(), 'F');
+
+      // Menu Items
+      doc.setTextColor(secondPageFontColor);
+      doc.setFontSize(secondPageFontSize);
 
       const categories = ['starters', 'main-course', 'rice-items', 'drinks'];
       categories.forEach(cat => {
