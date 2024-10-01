@@ -77,6 +77,14 @@
             font-weight: normal;
             margin-left: 10px;
         }
+
+        .item {
+            margin-left: 10px;
+        }
+
+        .line-space {
+            margin-bottom: 15px;
+        }
     </style>
 </head>
 <body>
@@ -185,12 +193,28 @@
                 </div>
             `;
 
-            secondPagePreview.innerHTML = menuItems.map(item => `
-                <div>
-                    <div class="category-heading">${item.category}</div>
-                    <div class="subheading">${item.type}: ${item.name} - ${item.price}</div>
-                </div>
-            `).join('');
+            // Group items by category and type
+            const groupedItems = menuItems.reduce((acc, item) => {
+                const key = `${item.category}-${item.type}`;
+                if (!acc[key]) {
+                    acc[key] = [];
+                }
+                acc[key].push(item);
+                return acc;
+            }, {});
+
+            secondPagePreview.innerHTML = Object.keys(groupedItems).map(key => {
+                const [category, type] = key.split('-');
+                const items = groupedItems[key];
+
+                return `
+                    <div class="line-space">
+                        <div class="category-heading">${category}</div>
+                        <div class="subheading">${type}</div>
+                        ${items.map(item => `<div class="item">${item.name} - ${item.price}</div>`).join('')}
+                    </div>
+                `;
+            }).join('');
         }
 
         function saveMenu() {
@@ -212,7 +236,7 @@
                 const logoImage = new Image();
                 logoImage.src = URL.createObjectURL(document.getElementById('logo-upload').files[0]);
                 logoImage.onload = function () {
-                    doc.addImage(logoImage, 'PNG', 10, 10, 50, 50); // Adjust logo position and size
+                    doc.addImage(logoImage, 'PNG', 10, 10, 50, 50); // logo dimensions
                     doc.addPage();
                     addMenuItemsToPDF(doc); // Call the function to add menu items to the PDF after adding the logo
                     doc.save(`${document.getElementById('restaurant-name').value}_menu.pdf`);
@@ -230,8 +254,34 @@
             doc.setTextColor(document.getElementById('secondPageFontColor').value);
             doc.setFontSize(document.getElementById('secondPageFontSize').value);
 
-            menuItems.forEach((item) => {
-                doc.text(`${item.category}: ${item.name} - ${item.price}`, 10, 20 + (menuItems.indexOf(item) * 10));
+            // Group items by category and type
+            const groupedItems = menuItems.reduce((acc, item) => {
+                const key = `${item.category}-${item.type}`;
+                if (!acc[key]) {
+                    acc[key] = [];
+                }
+                acc[key].push(item);
+                return acc;
+            }, {});
+
+            // Write items to PDF
+            let y = 20; // Starting Y position
+            Object.keys(groupedItems).forEach(key => {
+                const [category, type] = key.split('-');
+                doc.setFontSize(18);
+                doc.text(category, 10, y);
+                y += 10;
+                doc.setFontSize(16);
+                doc.text(type, 10, y);
+                y += 10;
+
+                groupedItems[key].forEach(item => {
+                    doc.setFontSize(14);
+                    doc.text(`${item.name} - ${item.price}`, 20, y);
+                    y += 10;
+                });
+
+                y += 5; // Add a line space after each category
             });
         }
 
